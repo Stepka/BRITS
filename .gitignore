@@ -1,4 +1,2 @@
 *.py[cod]
-json
-raw
 result/*.npy
