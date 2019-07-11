@@ -71,7 +71,7 @@ def to_month_bin(x):
 def from_month_bin(x):
     y = x // 12
     m = x % 12 + 1
-    return date(y, m, 1).strftime("%y-%m-%d")
+    return date(y, m, 1).strftime("%Y-%m-%d")
 
 
 def parse_data(x):
@@ -132,7 +132,6 @@ def parse_id(data, min_date, max_date):
         if len(data[data['month'] == m]) == 0:
             print("missed data for {}".format(from_month_bin(m)))
             not_for_train = True
-            break
         evals.append(parse_data(data[data['month'] == m]))
 
     # if user has missed data we exclude him from train dataset
