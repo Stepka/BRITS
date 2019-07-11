@@ -117,8 +117,10 @@ def parse_id(data, min_date, max_date):
     evals = []
 
     # merge all the metrics within one month
-    for h in range(min_date, max_date):
-        evals.append(parse_data(data[data['month'] == h]))
+    for m in range(min_date, max_date):
+        if len(data[data['month'] == m]) == 0:
+            print("missed data for {}".format(m))
+        evals.append(parse_data(data[data['month'] == m]))
 
     # normalization
     # evals = (np.array(evals) - mean) / std
@@ -130,11 +132,11 @@ def parse_id(data, min_date, max_date):
     evals = evals.reshape(-1)
 
     # randomly eliminate 10% values as the imputation ground-truth
-    indices = np.where(~np.isnan(evals))[0].tolist()
-    indices = np.random.choice(indices, len(indices) // 10)
-
+    # indices = np.where(~np.isnan(evals))[0].tolist()
+    # indices = np.random.choice(indices, len(indices) // 10)
+    #
     values = evals.copy()
-    values[indices] = np.nan
+    # values[indices] = np.nan
 
     masks = ~np.isnan(values)
     eval_masks = (~np.isnan(values)) ^ (~np.isnan(evals))
@@ -147,11 +149,13 @@ def parse_id(data, min_date, max_date):
 
     rec = {'label': 1}
 
+    num_rows = max_date - min_date + 1
+
     # prepare the model for both directions
     rec['forward'] = parse_rec(values, masks, evals, eval_masks, 'forward',
-                               max_date - min_date, len(attributes))
+                               num_rows, len(attributes))
     rec['backward'] = parse_rec(values[::-1], masks[::-1], evals[::-1], eval_masks[::-1], 'backward',
-                                max_date - min_date, len(attributes))
+                                num_rows, len(attributes))
 
     rec = json.dumps(rec)
 
@@ -173,6 +177,7 @@ attributes = shops
 i = 0
 total = len(ids)
 for id_ in ids:
+    i += 1
     print('Processing patient {} ({}/{})'.format(id_, i, total))
 
     s = time.time()
