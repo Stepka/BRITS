@@ -1,11 +1,10 @@
 # coding: utf-8
 
-import os
-import re
 import numpy as np
 import pandas as pd
 import ujson as json
 import argparse
+import time
 
 # patient_ids = []
 #
@@ -171,8 +170,13 @@ max_date = gaps['month'].max()
 
 attributes = shops
 
+i = 0
+total = len(ids)
 for id_ in ids:
-    print('Processing patient {}'.format(id_))
+    print('Processing patient {} ({}/{})'.format(id_, i, total))
+
+    s = time.time()
+
     try:
 
         data = gaps[gaps['unique_mem_id'] == id_]
@@ -180,6 +184,9 @@ for id_ in ids:
     except Exception as e:
         print(e)
         continue
+
+    e = time.time()
+    print('elapsed time: {}'.format(e - s))
 
 fs.close()
 
