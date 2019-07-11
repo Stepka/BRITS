@@ -5,23 +5,35 @@ import re
 import numpy as np
 import pandas as pd
 import ujson as json
+import argparse
 
-patient_ids = []
+# patient_ids = []
+#
+# for filename in os.listdir('./raw'):
+#     # the patient data in PhysioNet contains 6-digits
+#     match = re.search('\d{6}', filename)
+#     if match:
+#         id_ = match.group()
+#         patient_ids.append(id_)
 
-for filename in os.listdir('./raw'):
-    # the patient data in PhysioNet contains 6-digits
-    match = re.search('\d{6}', filename)
-    if match:
-        id_ = match.group()
-        patient_ids.append(id_)
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--default_path', type=str, default="./")
+args = parser.parse_args()
+
+default_path = args.default_path
+
+index_column_name = "merchant_name"
+value_column_name = "spend"
+time_column_name = "month"
 
 out = pd.read_csv('./raw/Outcomes-a.txt').set_index('RecordID')['In-hospital_death']
 
 # we select 35 attributes which contains enough non-values
-attributes = ['DiasABP', 'HR', 'Na', 'Lactate', 'NIDiasABP', 'PaO2', 'WBC', 'pH', 'Albumin', 'ALT', 'Glucose', 'SaO2',
-              'Temp', 'AST', 'Bilirubin', 'HCO3', 'BUN', 'RespRate', 'Mg', 'HCT', 'SysABP', 'FiO2', 'K', 'GCS',
-              'Cholesterol', 'NISysABP', 'TroponinT', 'MAP', 'TroponinI', 'PaCO2', 'Platelets', 'Urine', 'NIMAP',
-              'Creatinine', 'ALP']
+# attributes = ['DiasABP', 'HR', 'Na', 'Lactate', 'NIDiasABP', 'PaO2', 'WBC', 'pH', 'Albumin', 'ALT', 'Glucose', 'SaO2',
+#               'Temp', 'AST', 'Bilirubin', 'HCO3', 'BUN', 'RespRate', 'Mg', 'HCT', 'SysABP', 'FiO2', 'K', 'GCS',
+#               'Cholesterol', 'NISysABP', 'TroponinT', 'MAP', 'TroponinI', 'PaCO2', 'Platelets', 'Urine', 'NIMAP',
+#               'Creatinine', 'ALP']
 
 # mean and std of 35 attributes
 mean = np.array([59.540976152469405, 86.72320413227443, 139.06972964987443, 2.8797765291788986, 58.13833409690321,
@@ -49,8 +61,13 @@ def to_time_bin(x):
     return h
 
 
+def to_month_bin(x):
+    y, m, d = map(int, x.split('-'))
+    return y * 12 + (m - 1)
+
+
 def parse_data(x):
-    x = x.set_index('Parameter').to_dict()['Value']
+    x = x.set_index(index_column_name).to_dict()[value_column_name]
 
     values = []
 
@@ -62,23 +79,23 @@ def parse_data(x):
     return values
 
 
-def parse_delta(masks, dir_):
+def parse_delta(masks, dir_, num_rows, num_features):
     if dir_ == 'backward':
         masks = masks[::-1]
 
     deltas = []
 
-    for h in range(48):
+    for h in range(num_rows):
         if h == 0:
-            deltas.append(np.ones(35))
+            deltas.append(np.ones(num_features))
         else:
-            deltas.append(np.ones(35) + (1 - masks[h]) * deltas[-1])
+            deltas.append(np.ones(num_features) + (1 - masks[h]) * deltas[-1])
 
     return np.array(deltas)
 
 
-def parse_rec(values, masks, evals, eval_masks, dir_):
-    deltas = parse_delta(masks, dir_)
+def parse_rec(values, masks, evals, eval_masks, dir_, num_rows, num_features):
+    deltas = parse_delta(masks, dir_, num_rows, num_features)
 
     # only used in GRU-D
     forwards = pd.DataFrame(values).fillna(method='ffill').fillna(0.0).as_matrix()
@@ -96,18 +113,18 @@ def parse_rec(values, masks, evals, eval_masks, dir_):
     return rec
 
 
-def parse_id(id_):
-    data = pd.read_csv('./raw/{}.txt'.format(id_))
-    # accumulate the records within one hour
-    data['Time'] = data['Time'].apply(lambda x: to_time_bin(x))
+def parse_id(data, min_date, max_date):
 
     evals = []
 
-    # merge all the metrics within one hour
-    for h in range(48):
-        evals.append(parse_data(data[data['Time'] == h]))
+    # merge all the metrics within one month
+    for h in range(min_date, max_date):
+        evals.append(parse_data(data[data['month'] == h]))
 
-    evals = (np.array(evals) - mean) / std
+    # normalization
+    # evals = (np.array(evals) - mean) / std
+
+    evals = np.array(evals)
 
     shp = evals.shape
 
@@ -120,9 +137,7 @@ def parse_id(id_):
     values = evals.copy()
     values[indices] = np.nan
 
-    # mask for items where we have data
     masks = ~np.isnan(values)
-    # mask for items where data was missed (erased), in other words where we should impute data
     eval_masks = (~np.isnan(values)) ^ (~np.isnan(evals))
 
     evals = evals.reshape(shp)
@@ -131,23 +146,37 @@ def parse_id(id_):
     masks = masks.reshape(shp)
     eval_masks = eval_masks.reshape(shp)
 
-    label = out.loc[int(id_)]
-
-    rec = {'label': label}
+    rec = {'label': 1}
 
     # prepare the model for both directions
-    rec['forward'] = parse_rec(values, masks, evals, eval_masks, dir_='forward')
-    rec['backward'] = parse_rec(values[::-1], masks[::-1], evals[::-1], eval_masks[::-1], dir_='backward')
+    rec['forward'] = parse_rec(values, masks, evals, eval_masks, 'forward',
+                               max_date - min_date, len(attributes))
+    rec['backward'] = parse_rec(values[::-1], masks[::-1], evals[::-1], eval_masks[::-1], 'backward',
+                                max_date - min_date, len(attributes))
 
     rec = json.dumps(rec)
 
     fs.write(rec + '\n')
 
 
-for id_ in patient_ids:
+gaps = pd.read_csv('{}gaps.csv'.format(default_path))
+
+shops = gaps['merchant_name'].unique().tolist()
+ids = gaps['unique_mem_id'].unique().astype('int64').tolist()
+
+# accumulate the records within one hour
+gaps['month'] = gaps['month'].apply(lambda x: to_month_bin(x))
+min_date = gaps['month'].min()
+max_date = gaps['month'].max()
+
+attributes = shops
+
+for id_ in ids:
     print('Processing patient {}'.format(id_))
     try:
-        parse_id(id_)
+
+        data = gaps[gaps['unique_mem_id'] == id_]
+        parse_id(data, min_date, max_date)
     except Exception as e:
         print(e)
         continue
