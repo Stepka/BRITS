@@ -121,7 +121,7 @@ def parse_id(data, min_date, max_date):
     not_for_train = False
 
     # merge all the metrics within one month
-    for m in range(min_date, max_date):
+    for m in range(min_date, max_date + 1):
         if len(data[data['month'] == m]) == 0:
             print("missed data for {}".format(m))
             not_for_train = True
