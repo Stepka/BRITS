@@ -5,6 +5,7 @@ import pandas as pd
 import ujson as json
 import argparse
 import time
+from datetime import date
 
 # patient_ids = []
 #
@@ -67,6 +68,12 @@ def to_month_bin(x):
     return y * 12 + (m - 1)
 
 
+def from_month_bin(x):
+    y = x // 12
+    m = x % 12 + 1
+    return date(y, m, 1).strftime("%y-%m-%d")
+
+
 def parse_data(x):
     x = x.set_index(index_column_name).to_dict()[value_column_name]
 
@@ -123,7 +130,7 @@ def parse_id(data, min_date, max_date):
     # merge all the metrics within one month
     for m in range(min_date, max_date + 1):
         if len(data[data['month'] == m]) == 0:
-            print("missed data for {}".format(m))
+            print("missed data for {}".format(from_month_bin(m)))
             not_for_train = True
             break
         evals.append(parse_data(data[data['month'] == m]))
