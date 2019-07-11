@@ -43,6 +43,7 @@ std = np.array(
 
 fs = open('./json/json', 'w')
 
+
 def to_time_bin(x):
     h, m = map(int, x.split(':'))
     return h
@@ -106,6 +107,7 @@ def parse_id(id_):
     for h in range(48):
         evals.append(parse_data(data[data['Time'] == h]))
 
+    print(evals)
     evals = (np.array(evals) - mean) / std
 
     shp = evals.shape

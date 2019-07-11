@@ -9,6 +9,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
 
+
 class MySet(Dataset):
     def __init__(self):
         super(MySet, self).__init__()
@@ -30,6 +31,7 @@ class MySet(Dataset):
             rec['is_train'] = 1
         return rec
 
+
 def collate_fn(recs):
     forward = map(lambda x: x['forward'], recs)
     backward = map(lambda x: x['backward'], recs)
@@ -43,7 +45,6 @@ def collate_fn(recs):
         eval_masks = torch.FloatTensor(map(lambda r: r['eval_masks'], recs))
         forwards = torch.FloatTensor(map(lambda r: r['forwards'], recs))
 
-
         return {'values': values, 'forwards': forwards, 'masks': masks, 'deltas': deltas, 'evals': evals, 'eval_masks': eval_masks}
 
     ret_dict = {'forward': to_tensor_dict(forward), 'backward': to_tensor_dict(backward)}
@@ -53,14 +54,15 @@ def collate_fn(recs):
 
     return ret_dict
 
-def get_loader(batch_size = 64, shuffle = True):
+
+def get_loader(batch_size=64, shuffle=True):
     data_set = MySet()
-    data_iter = DataLoader(dataset = data_set, \
-                              batch_size = batch_size, \
-                              num_workers = 4, \
-                              shuffle = shuffle, \
-                              pin_memory = True, \
-                              collate_fn = collate_fn
+    data_iter = DataLoader(dataset=data_set, \
+                           batch_size=batch_size, \
+                           num_workers=4, \
+                           shuffle=shuffle, \
+                           pin_memory=True, \
+                           collate_fn=collate_fn
     )
 
     return data_iter
