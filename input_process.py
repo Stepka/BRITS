@@ -18,9 +18,11 @@ import time
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--default_path', type=str, default="./")
+parser.add_argument('--brits_path', type=str, default="./")
 args = parser.parse_args()
 
 default_path = args.default_path
+brits_path = args.brits_path
 
 index_column_name = "merchant_name"
 value_column_name = "spend"
@@ -52,7 +54,7 @@ time_column_name = "month"
 #      9.062327978713556, 106.50939503021543, 170.65318497610315, 14.856134327604906, 1.6369529387005546,
 #      133.96778334724377])
 
-fs = open('./json/json', 'w')
+fs = open(brits_path + 'json/json', 'w')
 
 
 def to_time_bin(x):
@@ -172,7 +174,7 @@ def parse_id(data, min_date, max_date):
     return True
 
 
-gaps = pd.read_csv('{}gaps.csv'.format(default_path))
+gaps = pd.read_csv(default_path + 'gaps.csv')
 
 shops = gaps['merchant_name'].unique().tolist()
 ids = gaps['unique_mem_id'].unique().astype('int64').tolist()
