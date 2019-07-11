@@ -109,6 +109,9 @@ def evaluate(model, val_iter):
     np.save('{}result/{}_data'.format(default_path, args.model), save_impute)
     np.save('{}result/{}_label'.format(default_path, args.model), save_label)
 
+    print(save_impute)
+    print(save_label)
+
 
 def run():
     model = getattr(models, args.model).Model(args.hid_size, args.impute_weight, args.label_weight)
