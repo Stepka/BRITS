@@ -26,8 +26,10 @@ parser.add_argument('--model', type=str)
 parser.add_argument('--hid_size', type=int)
 parser.add_argument('--impute_weight', type=float)
 parser.add_argument('--label_weight', type=float)
+parser.add_argument('--default_path', type=str, default=".")
 args = parser.parse_args()
 
+default_path = args.default_path
 
 def train(model):
     optimizer = optim.Adam(model.parameters(), lr=1e-3)
@@ -45,7 +47,7 @@ def train(model):
 
             run_loss += ret['loss'].item()
 
-            print '\r Progress epoch {}, {:.2f}%, average loss {}'.format(epoch, (idx + 1) * 100.0 / len(data_iter), run_loss / (idx + 1.0)),
+            print('\r Progress epoch {}, {:.2f}%, average loss {}'.format(epoch, (idx + 1) * 100.0 / len(data_iter), run_loss / (idx + 1.0)))
 
         evaluate(model, data_iter)
 
@@ -91,27 +93,27 @@ def evaluate(model, val_iter):
     labels = np.asarray(labels).astype('int32')
     preds = np.asarray(preds)
 
-    print 'AUC {}'.format(metrics.roc_auc_score(labels, preds))
+    print('AUC {}'.format(metrics.roc_auc_score(labels, preds)))
 
     evals = np.asarray(evals)
     imputations = np.asarray(imputations)
 
-    print 'MAE', np.abs(evals - imputations).mean()
+    print('MAE', np.abs(evals - imputations).mean())
 
-    print 'MRE', np.abs(evals - imputations).sum() / np.abs(evals).sum()
+    print('MRE', np.abs(evals - imputations).sum() / np.abs(evals).sum())
 
     save_impute = np.concatenate(save_impute, axis=0)
     save_label = np.concatenate(save_label, axis=0)
 
-    np.save('./result/{}_data'.format(args.model), save_impute)
-    np.save('./result/{}_label'.format(args.model), save_label)
+    np.save('{}/result/{}_data'.format(default_path, args.model), save_impute)
+    np.save('{}/result/{}_label'.format(default_path, args.model), save_label)
 
 
 def run():
     model = getattr(models, args.model).Model(args.hid_size, args.impute_weight, args.label_weight)
     total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    print("Default path: ", default_path)
     print('Total params is {}'.format(total_params))
-
     if torch.cuda.is_available():
         model = model.cuda()
 
