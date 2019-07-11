@@ -107,7 +107,6 @@ def parse_id(id_):
     for h in range(48):
         evals.append(parse_data(data[data['Time'] == h]))
 
-    print(evals)
     evals = (np.array(evals) - mean) / std
 
     shp = evals.shape
@@ -121,7 +120,9 @@ def parse_id(id_):
     values = evals.copy()
     values[indices] = np.nan
 
+    # mask for items where we have data
     masks = ~np.isnan(values)
+    # mask for items where data was missed (erased), in other words where we should impute data
     eval_masks = (~np.isnan(values)) ^ (~np.isnan(evals))
 
     evals = evals.reshape(shp)
