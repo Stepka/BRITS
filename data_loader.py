@@ -37,7 +37,7 @@ class MySet(Dataset):
         self.max_date = self.gaps['month'].max()
 
         self.shops = self.gaps['merchant_name'].unique().tolist()
-        self.all_ids = self.gaps['unique_mem_id'].unique().astype('int64').tolist()
+        self.all_ids = self.gaps['unique_mem_id'].unique().astype('int64')
         self.train_ids = self.all_ids[
             np.where(self.gaps.groupby(['unique_mem_id'])['month'].nunique().values == self.max_date - self.min_date + 1)
         ]
