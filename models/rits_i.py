@@ -57,6 +57,7 @@ class TemporalDecay(nn.Module):
         gamma = torch.exp(-gamma)
         return gamma
 
+
 class Model(nn.Module):
     def __init__(self, rnn_hid_size, impute_weight, label_weight):
         super(Model, self).__init__()
@@ -68,6 +69,7 @@ class Model(nn.Module):
         self.build()
 
     def build(self):
+        print("build model", FEATURES_NUM, SEQ_LEN)
         self.rnn_cell = nn.LSTMCell(FEATURES_NUM * 2, self.rnn_hid_size)
 
         self.regression = nn.Linear(self.rnn_hid_size, FEATURES_NUM)
