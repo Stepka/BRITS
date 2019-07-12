@@ -17,6 +17,7 @@ time_column_name = "month"
 
 default_path = "./"
 brits_path = "./"
+dataset_mame = ""
 
 
 class MySet(Dataset):
@@ -29,7 +30,7 @@ class MySet(Dataset):
         #
         # self.val_indices = set(val_indices.tolist())
 
-        self.gaps = pd.read_csv(default_path + 'gaps.csv')
+        self.gaps = pd.read_csv(default_path + dataset_mame)
 
         # accumulate the records within one month
         self.gaps['month'] = self.gaps['month'].apply(lambda x: self.to_month_bin(x))
@@ -60,6 +61,7 @@ class MySet(Dataset):
         # else:
         #     rec['is_train'] = 1
         id_ = self.train_ids[idx]
+        print("get {} item (id={})".format(idx, id_))
         data = self.gaps[self.gaps['unique_mem_id'] == id_]
         rec = self.parse_row(data, self.min_date, self.max_date)
         if id_ in self.val_indices:

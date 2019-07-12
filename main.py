@@ -28,10 +28,12 @@ parser.add_argument('--impute_weight', type=float)
 parser.add_argument('--label_weight', type=float)
 parser.add_argument('--default_path', type=str, default="./")
 parser.add_argument('--brits_path', type=str, default="./")
+parser.add_argument('--dataset', type=str)
 args = parser.parse_args()
 
 default_path = args.default_path
 brits_path = args.brits_path
+dataset_mame = args.dataset
 
 
 def train(model):
@@ -123,6 +125,7 @@ def run():
 
     data_loader.default_path = default_path
     data_loader.brits_path = brits_path
+    data_loader.dataset_mame = dataset_mame
 
     train(model)
 
