@@ -103,11 +103,11 @@ class Model(nn.Module):
         imputations = []
 
         for t in range(self.SEQ_LEN):
+            print("forward", values.shape, masks.shape, deltas.shape)
             x = values[:, t, :]
             m = masks[:, t, :]
             d = deltas[:, t, :]
 
-            # print("forward", x.shape, m.shape, d.shape)
             gamma = self.temp_decay(d)
             h = h * gamma
             x_h = self.regression(h)
