@@ -98,10 +98,11 @@ def evaluate(model, val_iter):
     labels = np.asarray(labels).astype('int32')
     preds = np.asarray(preds)
 
-    print('labels', labels)
-    print('preds', preds)
-
-    print('AUC {}'.format(metrics.roc_auc_score(labels, preds)))
+    # print('labels', labels)
+    # print('preds', preds)
+    #
+    # # roc_auc_score fails with exception when only 1 class is presented
+    # print('AUC {}'.format(metrics.roc_auc_score(labels, preds)))
 
     evals = np.asarray(evals)
     imputations = np.asarray(imputations)
