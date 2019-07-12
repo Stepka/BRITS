@@ -14,8 +14,6 @@ import data_loader
 from ipdb import set_trace
 from sklearn import metrics
 
-SEQ_LEN = 48
-FEATURES_NUM = 35
 
 def binary_cross_entropy_with_logits(input, target, weight=None, size_average=True, reduce=True):
     if not (target.size() == input.size()):
@@ -59,7 +57,11 @@ class TemporalDecay(nn.Module):
 
 
 class Model(nn.Module):
-    def __init__(self, rnn_hid_size, impute_weight, label_weight):
+    def __init__(self, rnn_hid_size, impute_weight, label_weight, features_num=35, seq_len=48):
+
+        self.SEQ_LEN = seq_len
+        self.FEATURES_NUM = features_num
+
         super(Model, self).__init__()
 
         self.rnn_hid_size = rnn_hid_size
@@ -69,11 +71,11 @@ class Model(nn.Module):
         self.build()
 
     def build(self):
-        print("build model", FEATURES_NUM, SEQ_LEN)
-        self.rnn_cell = nn.LSTMCell(FEATURES_NUM * 2, self.rnn_hid_size)
+        print("build model", self.FEATURES_NUM, self.SEQ_LEN)
+        self.rnn_cell = nn.LSTMCell(self.FEATURES_NUM * 2, self.rnn_hid_size)
 
-        self.regression = nn.Linear(self.rnn_hid_size, FEATURES_NUM)
-        self.temp_decay = TemporalDecay(input_size=FEATURES_NUM, rnn_hid_size=self.rnn_hid_size)
+        self.regression = nn.Linear(self.rnn_hid_size, self.FEATURES_NUM)
+        self.temp_decay = TemporalDecay(input_size=self.FEATURES_NUM, rnn_hid_size=self.rnn_hid_size)
 
         self.out = nn.Linear(self.rnn_hid_size, 1)
 
@@ -100,7 +102,7 @@ class Model(nn.Module):
 
         imputations = []
 
-        for t in range(SEQ_LEN):
+        for t in range(self.SEQ_LEN):
             x = values[:, t, :]
             m = masks[:, t, :]
             d = deltas[:, t, :]

@@ -116,7 +116,17 @@ def evaluate(model, val_iter):
 
 
 def run():
-    model = getattr(models, args.model).Model(args.hid_size, args.impute_weight, args.label_weight)
+
+    gaps = pd.read_csv(default_path + dataset_mame)
+
+    shops = gaps['merchant_name'].unique()
+    months = gaps['month'].unique()
+
+    model = getattr(models, args.model).Model(args.hid_size,
+                                              args.impute_weight,
+                                              args.label_weight,
+                                              len(shops),
+                                              len(months))
     total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print("Default path: {}".format(default_path))
     print("BRITS path: {}".format(brits_path))
@@ -128,13 +138,8 @@ def run():
     data_loader.brits_path = brits_path
     data_loader.dataset_mame = dataset_mame
 
-    gaps = pd.read_csv(default_path + dataset_mame)
-
-    shops = gaps['merchant_name'].unique()
-    months = gaps['month'].unique()
-
-    getattr(models, args.model).SEQ_LEN = len(months)
-    getattr(models, args.model).FEATURES_NUM = len(shops)
+    # getattr(models, args.model).SEQ_LEN = len(months)
+    # getattr(models, args.model).FEATURES_NUM = len(shops)
 
     train(model)
 
