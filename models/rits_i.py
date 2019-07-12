@@ -84,6 +84,7 @@ class Model(nn.Module):
         values = data[direct]['values']
         masks = data[direct]['masks']
         deltas = data[direct]['deltas']
+        print(data[direct]['masks'])
 
         evals = data[direct]['evals']
         eval_masks = data[direct]['eval_masks']
