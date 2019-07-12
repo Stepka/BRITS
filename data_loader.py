@@ -39,6 +39,7 @@ class MySet(Dataset):
 
         self.means = self.gaps.groupby(['merchant_name']).mean()['spend'].values
         self.stds = self.gaps.groupby(['merchant_name']).std()['spend'].values
+        self.stds[self.stds == 0] = 1
 
         self.shops = self.gaps['merchant_name'].unique().tolist()
         self.all_ids = self.gaps['unique_mem_id'].unique().astype('int64')
