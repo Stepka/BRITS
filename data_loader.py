@@ -30,7 +30,7 @@ class MySet(Dataset):
         #
         # self.val_indices = set(val_indices.tolist())
 
-        self.gaps = pd.read_csv(default_path + dataset_mame)
+        self.gaps = pd.read_csv(default_path + dataset_mame, encoding="ISO-8859-1")
 
         # accumulate the records within one month
         self.gaps['month'] = self.gaps['month'].apply(lambda x: self.to_month_bin(x))
