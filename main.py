@@ -70,7 +70,6 @@ def evaluate(model, val_iter):
     save_label = []
 
     for idx, data in enumerate(val_iter):
-        print(idx, data, len(val_iter))
         data = utils.to_var(data)
         ret = model.run_on_batch(data, None)
 
