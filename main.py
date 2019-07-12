@@ -118,6 +118,7 @@ def evaluate(model, val_iter):
 def run():
     model = getattr(models, args.model).Model(args.hid_size, args.impute_weight, args.label_weight)
     total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    getattr(models, args.model).SEQ_LEN = 31
     print("Default path: {}".format(default_path))
     print("BRITS path: {}".format(brits_path))
     print('Total params is {}'.format(total_params))

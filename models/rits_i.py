@@ -102,6 +102,7 @@ class Model(nn.Module):
             m = masks[:, t, :]
             d = deltas[:, t, :]
 
+            print("forward", len(x), len(m), len(d))
             gamma = self.temp_decay(d)
             h = h * gamma
             x_h = self.regression(h)
