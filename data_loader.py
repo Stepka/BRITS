@@ -128,8 +128,8 @@ class MySet(Dataset):
 
         rec['values'] = np.nan_to_num(values).tolist()
         rec['masks'] = masks.astype('int32').tolist()
-        print('masks 32', rec['masks'])
-        print('masks', masks)
+        # print('masks 32', rec['masks'])
+        # print('masks', masks)
         # imputation ground-truth
         rec['evals'] = np.nan_to_num(evals).tolist()
         rec['eval_masks'] = eval_masks.astype('int32').tolist()
