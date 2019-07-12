@@ -15,6 +15,7 @@ from ipdb import set_trace
 from sklearn import metrics
 
 SEQ_LEN = 48
+FEATURES_NUM = 35
 
 def binary_cross_entropy_with_logits(input, target, weight=None, size_average=True, reduce=True):
     if not (target.size() == input.size()):
@@ -67,10 +68,10 @@ class Model(nn.Module):
         self.build()
 
     def build(self):
-        self.rnn_cell = nn.LSTMCell(35 * 2, self.rnn_hid_size)
+        self.rnn_cell = nn.LSTMCell(FEATURES_NUM * 2, self.rnn_hid_size)
 
-        self.regression = nn.Linear(self.rnn_hid_size, 35)
-        self.temp_decay = TemporalDecay(input_size = 35, rnn_hid_size = self.rnn_hid_size)
+        self.regression = nn.Linear(self.rnn_hid_size, FEATURES_NUM)
+        self.temp_decay = TemporalDecay(input_size=FEATURES_NUM, rnn_hid_size=self.rnn_hid_size)
 
         self.out = nn.Linear(self.rnn_hid_size, 1)
 
