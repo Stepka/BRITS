@@ -23,52 +23,52 @@ dataset_mame = ""
 class MySet(Dataset):
     def __init__(self):
         super(MySet, self).__init__()
-        self.content = open(brits_path + 'json/json').readlines()
+        # self.content = open(brits_path + 'json/json').readlines()
+        #
+        # indices = np.arange(len(self.content))
+        # val_indices = np.random.choice(indices, len(self.content) // 5)
+        #
+        # self.val_indices = set(val_indices.tolist())
 
-        indices = np.arange(len(self.content))
-        val_indices = np.random.choice(indices, len(self.content) // 5)
+        self.gaps = pd.read_csv(default_path + dataset_mame)
 
+        # accumulate the records within one month
+        self.gaps['month'] = self.gaps['month'].apply(lambda x: self.to_month_bin(x))
+        self.min_date = self.gaps['month'].min()
+        self.max_date = self.gaps['month'].max()
+
+        self.shops = self.gaps['merchant_name'].unique().tolist()
+        self.all_ids = self.gaps['unique_mem_id'].unique().astype('int64')
+        self.train_ids = self.all_ids[
+            np.where(self.gaps.groupby(['unique_mem_id'])['month'].nunique().values == self.max_date - self.min_date + 1)
+        ]
+        self.missed_data_ids = self.all_ids[
+            np.where(self.gaps.groupby(['unique_mem_id'])['month'].nunique().values < self.max_date - self.min_date + 1)
+        ]
+
+        val_indices = np.random.choice(self.train_ids, len(self.train_ids) // 5)
         self.val_indices = set(val_indices.tolist())
 
-        # self.gaps = pd.read_csv(default_path + dataset_mame)
-        #
-        # # accumulate the records within one month
-        # self.gaps['month'] = self.gaps['month'].apply(lambda x: self.to_month_bin(x))
-        # self.min_date = self.gaps['month'].min()
-        # self.max_date = self.gaps['month'].max()
-        #
-        # self.shops = self.gaps['merchant_name'].unique().tolist()
-        # self.all_ids = self.gaps['unique_mem_id'].unique().astype('int64')
-        # self.train_ids = self.all_ids[
-        #     np.where(self.gaps.groupby(['unique_mem_id'])['month'].nunique().values == self.max_date - self.min_date + 1)
-        # ]
-        # self.missed_data_ids = self.all_ids[
-        #     np.where(self.gaps.groupby(['unique_mem_id'])['month'].nunique().values < self.max_date - self.min_date + 1)
-        # ]
-        #
-        # val_indices = np.random.choice(self.train_ids, len(self.train_ids) // 5)
-        # self.val_indices = set(val_indices.tolist())
-        #
-        # self.attributes = self.shops
+        self.attributes = self.shops
 
     def __len__(self):
-        # return len(self.train_ids)
-        return len(self.content)
+        return len(self.train_ids)
+        # return len(self.content)
 
     def __getitem__(self, idx):
-        rec = json.loads(self.content[idx])
-        if idx in self.val_indices:
-            rec['is_train'] = 0
-        else:
-            rec['is_train'] = 1
-        # id_ = self.train_ids[idx]
-        # print("get {} item (id={})".format(idx, id_))
-        # data = self.gaps[self.gaps['unique_mem_id'] == id_]
-        # rec = self.parse_row(data, self.min_date, self.max_date)
-        # if id_ in self.val_indices:
+        # rec = json.loads(self.content[idx])
+        # if idx in self.val_indices:
         #     rec['is_train'] = 0
         # else:
         #     rec['is_train'] = 1
+        id_ = self.train_ids[idx]
+        print("get {} item (id={})".format(idx, id_))
+        data = self.gaps[self.gaps['unique_mem_id'] == id_]
+        rec = self.parse_row(data, self.min_date, self.max_date)
+        if id_ in self.val_indices:
+            rec['is_train'] = 0
+        else:
+            rec['is_train'] = 1
         return rec
 
     def to_time_bin(self, x):
