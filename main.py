@@ -27,9 +27,11 @@ parser.add_argument('--hid_size', type=int)
 parser.add_argument('--impute_weight', type=float)
 parser.add_argument('--label_weight', type=float)
 parser.add_argument('--default_path', type=str, default="./")
+parser.add_argument('--brits_path', type=str, default="./")
 args = parser.parse_args()
 
 default_path = args.default_path
+brits_path = args.brits_path
 
 
 def train(model):
@@ -114,9 +116,13 @@ def run():
     model = getattr(models, args.model).Model(args.hid_size, args.impute_weight, args.label_weight)
     total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print("Default path: {}".format(default_path))
+    print("BRITS path: {}".format(brits_path))
     print('Total params is {}'.format(total_params))
     if torch.cuda.is_available():
         model = model.cuda()
+
+    data_loader.default_path = default_path
+    data_loader.brits_path = brits_path
 
     train(model)
 
