@@ -40,6 +40,10 @@ class MySet(Dataset):
         self.means = self.gaps.groupby(['merchant_name']).mean()['spend'].values
         self.stds = self.gaps.groupby(['merchant_name']).std()['spend'].values
         self.stds[self.stds == 0] = 1
+        self.mins = self.gaps.groupby(['merchant_name']).min()['spend'].values
+        self.maxs = self.gaps.groupby(['merchant_name']).max()['spend'].values
+        self.base = self.maxs - self.mins
+        self.base[self.base == 0] = 1
 
         self.shops = self.gaps['merchant_name'].unique().tolist()
         self.all_ids = self.gaps['unique_mem_id'].unique().astype('int64')
@@ -150,10 +154,10 @@ class MySet(Dataset):
             return False
 
         # normalization
-        evals = (np.array(evals) - self.means) / self.stds
+        # evals = (np.array(evals) - self.means) / self.stds
+        evals = (np.array(evals) - self.mins) / self.base
 
         evals = np.array(evals)
-        print(evals[:10])
 
         shp = evals.shape
 
