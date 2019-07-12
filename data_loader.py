@@ -118,7 +118,7 @@ class MySet(Dataset):
         deltas = self.parse_delta(masks, dir_, num_rows, num_features)
 
         # only used in GRU-D
-        forwards = pd.DataFrame(values).fillna(method='ffill').fillna(0.0).as_matrix()
+        forwards = pd.DataFrame(values).fillna(method='ffill').fillna(0.0).values
 
         rec = {}
 
@@ -153,6 +153,7 @@ class MySet(Dataset):
         evals = (np.array(evals) - self.means) / self.stds
 
         evals = np.array(evals)
+        print(evals[:10])
 
         shp = evals.shape
 
