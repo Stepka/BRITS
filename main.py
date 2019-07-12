@@ -124,6 +124,7 @@ def evaluate(model, val_iter):
 
 def run():
 
+    print(default_path + dataset_mame, default_path, dataset_mame)
     gaps = pd.read_csv(default_path + dataset_mame)
 
     shops = gaps['merchant_name'].unique()
