@@ -20,10 +20,12 @@ from datetime import date
 parser = argparse.ArgumentParser()
 parser.add_argument('--default_path', type=str, default="./")
 parser.add_argument('--brits_path', type=str, default="./")
+parser.add_argument('--dataset', type=str)
 args = parser.parse_args()
 
 default_path = args.default_path
 brits_path = args.brits_path
+dataset_mame = args.dataset
 
 index_column_name = "merchant_name"
 value_column_name = "spend"
@@ -180,7 +182,7 @@ def parse_id(data, min_date, max_date):
     return True
 
 
-gaps = pd.read_csv(default_path + 'gaps.csv')
+gaps = pd.read_csv(default_path + dataset_mame)
 
 shops = gaps['merchant_name'].unique().tolist()
 ids = gaps['unique_mem_id'].unique().astype('int64').tolist()
