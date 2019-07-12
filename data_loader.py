@@ -37,15 +37,15 @@ class MySet(Dataset):
         self.min_date = self.gaps['month'].min()
         self.max_date = self.gaps['month'].max()
 
-        self.means = self.gaps.groupby(['merchant_name']).mean()['spend'].values
-        self.stds = self.gaps.groupby(['merchant_name']).std()['spend'].values
+        self.means = self.gaps.sort_values(['merchant_name']).groupby(['merchant_name']).mean()['spend'].values
+        self.stds = self.gaps.sort_values(['merchant_name']).groupby(['merchant_name']).std()['spend'].values
         self.stds[self.stds == 0] = 1
-        self.mins = self.gaps.groupby(['merchant_name']).min()['spend'].values
-        self.maxs = self.gaps.groupby(['merchant_name']).max()['spend'].values
+        self.mins = self.gaps.sort_values(['merchant_name']).groupby(['merchant_name']).min()['spend'].values
+        self.maxs = self.gaps.sort_values(['merchant_name']).groupby(['merchant_name']).max()['spend'].values
         self.base = self.maxs - self.mins
         self.base[self.base == 0] = 1
 
-        self.shops = self.gaps['merchant_name'].unique().tolist()
+        self.shops = self.gaps.sort_values(['merchant_name'])['merchant_name'].unique().tolist()
         self.all_ids = self.gaps['unique_mem_id'].unique().astype('int64')
         self.train_ids = self.all_ids[
             np.where(self.gaps.groupby(['unique_mem_id'])['month'].nunique().values == self.max_date - self.min_date + 1)
