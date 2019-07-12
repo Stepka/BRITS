@@ -179,7 +179,7 @@ class MySet(Dataset):
         rec['backward'] = self.parse_rec(values[::-1], masks[::-1], evals[::-1], eval_masks[::-1], 'backward',
                                     num_rows, len(self.attributes))
 
-        rec = json.dumps(rec)
+        # rec = json.dumps(rec)
 
         # fs.write(rec + '\n')
 
