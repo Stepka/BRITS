@@ -201,20 +201,20 @@ def collate_fn(recs):
     backward = map(lambda x: x['backward'], recs)
 
     def to_tensor_dict(recs):
-        values = torch.FloatTensor(map(lambda r: r['values'], recs))
-        masks = torch.FloatTensor(map(lambda r: r['masks'], recs))
-        deltas = torch.FloatTensor(map(lambda r: r['deltas'], recs))
+        values = torch.FloatTensor(list(map(lambda r: r['values'], recs)))
+        masks = torch.FloatTensor(list(map(lambda r: r['masks'], recs)))
+        deltas = torch.FloatTensor(list(map(lambda r: r['deltas'], recs)))
 
-        evals = torch.FloatTensor(map(lambda r: r['evals'], recs))
-        eval_masks = torch.FloatTensor(map(lambda r: r['eval_masks'], recs))
-        forwards = torch.FloatTensor(map(lambda r: r['forwards'], recs))
+        evals = torch.FloatTensor(list(map(lambda r: r['evals'], recs)))
+        eval_masks = torch.FloatTensor(list(map(lambda r: r['eval_masks'], recs)))
+        forwards = torch.FloatTensor(list(map(lambda r: r['forwards'], recs)))
 
         return {'values': values, 'forwards': forwards, 'masks': masks, 'deltas': deltas, 'evals': evals, 'eval_masks': eval_masks}
 
     ret_dict = {'forward': to_tensor_dict(forward), 'backward': to_tensor_dict(backward)}
 
-    ret_dict['labels'] = torch.FloatTensor(map(lambda x: x['label'], recs))
-    ret_dict['is_train'] = torch.FloatTensor(map(lambda x: x['is_train'], recs))
+    ret_dict['labels'] = torch.FloatTensor(list(map(lambda x: x['label'], recs)))
+    ret_dict['is_train'] = torch.FloatTensor(list(map(lambda x: x['is_train'], recs)))
 
     return ret_dict
 
