@@ -37,6 +37,9 @@ class MySet(Dataset):
         self.min_date = self.gaps['month'].min()
         self.max_date = self.gaps['month'].max()
 
+        self.means = self.gaps.groupby(['merchant_name']).mean()['spend'].values
+        self.stds = self.gaps.groupby(['merchant_name']).std()['spend'].values
+
         self.shops = self.gaps['merchant_name'].unique().tolist()
         self.all_ids = self.gaps['unique_mem_id'].unique().astype('int64')
         self.train_ids = self.all_ids[
@@ -146,7 +149,7 @@ class MySet(Dataset):
             return False
 
         # normalization
-        # evals = (np.array(evals) - mean) / std
+        evals = (np.array(evals) - self.means) / self.stds
 
         evals = np.array(evals)
 
