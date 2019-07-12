@@ -107,6 +107,10 @@ def evaluate(model, val_iter):
     evals = np.asarray(evals)
     imputations = np.asarray(imputations)
 
+    print(evals.shape, imputations.shape)
+    print(evals[:10])
+    print(imputations[:10])
+
     print('MAE', np.abs(evals - imputations).mean())
 
     print('MRE', np.abs(evals - imputations).sum() / np.abs(evals).sum())
